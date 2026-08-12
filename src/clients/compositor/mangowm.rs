@@ -171,16 +171,17 @@ fn diff(old: &[Workspace], new: &[Workspace]) -> Vec<WorkspaceUpdate> {
         }
     }
 
-    let old_focused = old.iter().find(|w| w.visibility.is_focused());
-    let new_focused = new.iter().find(|w| w.visibility.is_focused());
+    for new_focused in new.iter().filter(|w| w.visibility.is_focused()) {
+        let old_focused = old
+            .iter()
+            .find(|w| w.monitor == new_focused.monitor && w.visibility.is_focused());
 
-    if let Some(new_focused) = new_focused
-        && old_focused.map(|w| w.id) != Some(new_focused.id)
-    {
-        updates.push(WorkspaceUpdate::Focus {
-            old: old_focused.cloned(),
-            new: new_focused.clone(),
-        });
+        if old_focused.map(|w| w.id) != Some(new_focused.id) {
+            updates.push(WorkspaceUpdate::Focus {
+                old: old_focused.cloned(),
+                new: new_focused.clone(),
+            });
+        }
     }
 
     updates
